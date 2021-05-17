@@ -36,9 +36,9 @@ int main(void)
     system("rm  ./snifflog/*");
   }
 
-  int sock, n,k = 0;
+  int sock, n;
   char buffer[MAX_BUFFER_SIZE];
-  unsigned char *iphead, *ethead;
+  unsigned char  *ethead;
   struct ifreq ifr;
 
   sock = socket(PF_PACKET, SOCK_RAW,htons(ETH_P_ALL)); //ETH_P_IP就会收不到自己发出去的包
@@ -96,9 +96,11 @@ while(1){
         printf("Version: %d\n", IPV4);
         printf("Header length:%d(bytes)\n", IPV4_HEADER_LEN);
         printf("Differentiated services field:%#02x\n", ethead[15] );
+        //左移会获得整倍数
         printf("Total length:%u\n", (ethead[16]<<8)+ethead[17]);
         printf("Identification:%#02x%02x\n", ethead[18],ethead[19]);
         printf("Flags:%#02x\n", ntohs(ethead[20]));
+        //使用按位与，与掩码
         printf("\tReserved bit:   %s\n",((ethead[20] & 0x8000) == 0x8000) ? "set\n":"Not set\n");
         printf("\tDont't fragment:%s\n",((ethead[20] & 0x4000) == 0x4000) ? "set\n":"Not set\n");
         printf("\tMore fragments: %s\n",((ethead[20] & 0x2000) == 0x2000) ? "set\n":"Not set\n");
@@ -135,17 +137,17 @@ while(1){
           printf("Header length:%u\n", n - 24);
           printf("Flags:%#02x(",ethead[47]);
           if((ethead[46] & 0x1000) == 0x1000)
-            printf("syn)\n");
+            {printf("syn)\n");}
             if(((ethead[46] & 0x1000) == 0x1000)&&(((ethead[46] & 0x4000) == 0x4000)))
-              printf("syn,ack)\n");
+              {printf("syn,ack)\n");}
               if(((ethead[46] & 0x4000) == 0x4000)&&((ethead[47] & 0x1000) == 0x1000))
-              printf("fin,ack)\n");
+              {printf("fin,ack)\n");}
           printf("\tReserved:%s\n",((ethead[46] & 0x9000) == 0x9000)? "set\n":"not set");
           printf("\tNonce:   %s\n",((ethead[46] & 0x8000) == 0x8000)? "set\n":"not set");
           printf("\tCWR:     %s\n",((ethead[46] & 0x7000) == 0x7000)? "set\n":"not set");
           printf("\tECN-Echo:%s\n",((ethead[46] & 0x6000) == 0x6000)? "set\n":"not set");
           printf("\tUrgent:  %s\n",((ethead[46] & 0x5000) == 0x5000)? "set\n":"not set");
-          printf("\ACK:      %s\n",((ethead[46] & 0x4000) == 0x4000)? "set\n":"not set");
+          printf("\tACK:      %s\n",((ethead[46] & 0x4000) == 0x4000)? "set\n":"not set");
           printf("\tPush:    %s\n",((ethead[46] & 0x3000) == 0x3000)? "set\n":"not set");
           printf("\tReset:   %s\n",((ethead[46] & 0x2000) == 0x2000)? "set\n":"not set");
           printf("\tSyn:     %s\n",((ethead[46] & 0x1000) == 0x1000)? "set\n":"not set");
